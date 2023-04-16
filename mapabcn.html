@@ -1,0 +1,79 @@
+<html>
+
+<body>
+    <!-- Inputs per ficar nom, latitud i longitud d'un marcador -->
+    <div>
+        <label for="nom">Nom:</label>
+        <input type="text" id="nom">
+        <label for="lat">Latitud:</label>
+        <input type="text" id="lat">
+        <label for="lon">Longitud:</label>
+        <input type="text" id="lon">
+        <button id="ficamarker">Afegir marcador</button>
+    </div><br>
+    <!-- Div on es troba el mapa del openlayers -->
+    <div id="basicMap"></div>
+    <script src="http://www.openlayers.org/api/OpenLayers.js"></script>
+    <script>
+        function init() {
+            //Exercici 1
+            let map = new OpenLayers.Map("basicMap");
+            let mapnik = new OpenLayers.Layer.OSM();
+            let fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
+            let toProjection = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
+            //Guarda coordenades transformades en Projeccio de Mercator (com als mapes fisics)
+            let position = new OpenLayers.LonLat(2.154007, 41.390205).transform(fromProjection, toProjection);
+            //Determina nivell de zoom al mapa
+            let zoom = 13;
+
+            //Exercici 2
+            let markers = new OpenLayers.Layer.Markers("Markers");
+            map.addLayer(markers);
+            //Es posa marcador a la posicio que volguem (en aquest cas, la mateixa on hem centrat el mapa)
+            let marker = new OpenLayers.Marker(position);
+            markers.addMarker(marker);
+
+
+            map.addLayer(mapnik);
+            //Es centra el mapa en les coordenades i el zoom indicats
+            map.setCenter(position, zoom);
+
+            // Exercici 3
+            //Al fer clic, ens surt un popup del tamany indicat amb el text "Aixo es Barcelona"
+            marker.events.register("mousedown", marker, function () {
+                let popup = new OpenLayers.Popup("popup",
+                    marker.lonlat,
+                    new OpenLayers.Size(200, 50),
+                    "Això és Barcelona",
+                    true);
+                map.addPopup(popup);
+            });
+
+            //Exercici 4
+
+            //Es vigila que es faci clic al boto ficamarker, es guarden els valors del form, i es fica
+            //el marcador fent servir les coordenades indicades, i el nom com a missatge
+            document.getElementById("ficamarker").addEventListener("click", function () {
+                let nom = document.getElementById("nom").value;
+                let lat = document.getElementById("lat").value;
+                let lon = document.getElementById("lon").value;
+                let position = new OpenLayers.LonLat(lon, lat).transform(fromProjection, toProjection);
+                let marker = new OpenLayers.Marker(position);
+                //Lo mateix que a l'exercici 3
+                marker.events.register("mousedown", marker, function () {
+                    let popup = new OpenLayers.Popup("popup",
+                        marker.lonlat,
+                        new OpenLayers.Size(200, 50),
+                        nom,
+                        true);
+                    map.addPopup(popup);
+                });
+                markers.addMarker(marker);
+            });
+        }
+        init();
+
+    </script>
+</body>
+
+</html>
