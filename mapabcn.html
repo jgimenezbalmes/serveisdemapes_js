@@ -70,9 +70,46 @@
                 });
                 markers.addMarker(marker);
             });
-        }
-        init();
+            
+            //Exercici ApiBCN
 
+            let xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === xhr.DONE) {
+
+                    let resposta = xhr.responseText;
+                    let obj = JSON.parse(resposta);
+                    passaObjecte(obj)
+                }
+            }
+            //Part 1: He tret les dades d'Ateneus del 2019 de l'API d'aquesta forma (ens ho dona directament en JSON)
+            xhr.open("GET", "https://dades.eicub.net/api/1/ateneus?Any=2019");
+            xhr.send(null);
+
+            function passaObjecte(obj) {
+                //S'itera la llista en format JSON
+                for (x = 0; x < obj.length; x++) {
+                    //Part 2: S'agafa Latitud i Longitud de cada element de la llista
+                    let posateneu = new OpenLayers.LonLat(obj[x].Longitud, obj[x].Latitud).transform(fromProjection, toProjection);
+                    let markateneu = new OpenLayers.Marker(posateneu);
+              
+                    //Part 3: Es fica info del marcador agafant el valor Equipament del element de JSON (com l'exercici 3)
+                    markateneu.events.register("mousedown", markateneu, (function (e) {
+                        let popupateneu = new OpenLayers.Popup("popup",
+                            markateneu.lonlat,
+                            new OpenLayers.Size(200, 50),
+                            e.Equipament,
+                            true);
+                        map.addPopup(popupateneu);
+                        //IMPORTANT! Necessari fer bind per agafar l'objecte de la funcio passaObjecte, sino queda undefined!
+                    }).bind(this,obj[x]));
+
+                    markers.addMarker(markateneu);
+                };
+            };
+        };
+            //Crida a tota la funcio
+            init();
     </script>
 </body>
 
